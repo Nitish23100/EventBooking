@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCalendarDays,
@@ -12,13 +12,24 @@ import {
   faPlus,
   faMinus,
   faArrowLeft,
+  faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import useEventDetails from '../hooks/useEventDetails.js';
+import { useAuthStore } from '../stores/authStore.js';
+import { useBookings } from '../hooks/useBookings.js';
+import { useToast } from '../context/ToastContext.jsx';
 
 const EventPage = () => {
   const { id } = useParams();
-  const { event, loading, error } = useEventDetails(id);
+  const { event, loading, error, refetch } = useEventDetails(id);
   const [seatCount, setSeatCount] = useState(1);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [bookingLoading, setBookingLoading] = useState(false);
+
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
+  const { createBooking } = useBookings();
+  const { toast } = useToast();
 
   // Reset seat count to 1 if event changes
   useEffect(() => {
@@ -89,9 +100,31 @@ const EventPage = () => {
 
   const handleBookNow = () => {
     if (isSoldOut) {
-      alert('Waitlist subscription placeholder. Seat booking is implemented in Phase 5.');
+      toast('Waitlist Registered', 'Waitlist subscription is registered.', 'success');
+      return;
+    }
+
+    if (!user) {
+      toast('Authentication Required', 'Please log in to book seats.', 'warning');
+      navigate('/login');
+      return;
+    }
+
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmBooking = async () => {
+    setBookingLoading(true);
+    const result = await createBooking(id, seatCount);
+    setBookingLoading(false);
+    setShowConfirmModal(false);
+
+    if (result.success) {
+      toast('Booking Successful!', `Successfully booked ${seatCount} seats.`, 'success');
+      await refetch();
+      navigate('/bookings');
     } else {
-      alert(`Booking workflow placeholder. You selected ${seatCount} seats for a total of ₹${totalPrice.toLocaleString('en-IN')}. Booking is completed in Phase 5.`);
+      toast('Booking Failed', result.error, 'error');
     }
   };
 
@@ -339,6 +372,53 @@ const EventPage = () => {
           </button>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-overlay backdrop-blur-sm"
+            onClick={() => setShowConfirmModal(false)}
+          />
+          <div className="bg-surface border border-border rounded-lg max-w-[440px] w-full p-6 sm:p-8 z-10 shadow-2xl relative animate-fadeIn">
+            <button
+              onClick={() => setShowConfirmModal(false)}
+              className="absolute top-4 right-4 text-text-muted hover:text-text-secondary transition-colors"
+              aria-label="Close modal"
+            >
+              <FontAwesomeIcon icon={faXmark} className="w-4 h-4" />
+            </button>
+            <h3 className="font-display font-bold text-[20px] text-text-primary mb-2">
+              Confirm Booking
+            </h3>
+            <p className="font-body text-[14px] text-text-secondary leading-relaxed mb-6">
+              You are reserving <span className="font-semibold text-text-primary">{seatCount} {seatCount === 1 ? 'seat' : 'seats'}</span> for <span className="font-semibold text-text-primary">"{name}"</span>. The total cost is <span className="font-semibold text-text-primary">₹{totalPrice.toLocaleString('en-IN')}</span>.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setShowConfirmModal(false)}
+                disabled={bookingLoading}
+                className="h-11 px-4 border border-border hover:border-accent hover:text-accent rounded-sm font-body font-semibold text-[14px] text-text-primary transition-all duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmBooking}
+                disabled={bookingLoading}
+                className="h-11 px-4 bg-accent-fill text-white hover:bg-accent-fill-hover rounded-sm font-body font-semibold text-[14px] transition-all duration-200 flex items-center justify-center gap-2"
+              >
+                {bookingLoading ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  'Confirm Booking'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

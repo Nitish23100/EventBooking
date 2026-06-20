@@ -4,6 +4,7 @@ import cors from 'cors';
 import { env } from './config/env.js';
 import authRoutes from './routes/auth.routes.js';
 import eventRoutes from './routes/event.routes.js';
+import bookingRoutes from './routes/booking.routes.js';
 
 const app = express();
 
@@ -21,6 +22,9 @@ app.use('/api/auth', authRoutes);
 
 // Event routes
 app.use('/api/events', eventRoutes);
+
+// Booking routes
+app.use('/api/bookings', bookingRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
