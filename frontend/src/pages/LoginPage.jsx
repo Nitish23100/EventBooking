@@ -265,28 +265,72 @@ const LoginPage = () => {
           </span>
         </div>
 
-        <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/12 w-[340px] h-[220px] flex flex-col gap-6 items-center pointer-events-none">
-          <div className="w-[300px] h-[90px] rounded-md bg-surface-elevated/40 border border-border/30 backdrop-blur-md rotate-[-4deg] -translate-x-6 flex items-center px-4 gap-4 opacity-80">
-            <div className="w-12 h-12 rounded bg-accent/10 flex-shrink-0" />
-            <div className="flex-1 flex flex-col gap-2">
-              <div className="h-3 w-3/4 rounded bg-text-muted/20" />
-              <div className="h-2 w-1/2 rounded bg-text-muted/10" />
+        <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-[10%] w-[340px] flex flex-col items-center pointer-events-none">
+          
+          {/* Main Ticket */}
+          <div className="relative w-[320px] rounded-xl bg-surface-elevated/85 border border-border/60 backdrop-blur-xl shadow-2xl overflow-hidden rotate-[3deg] translate-x-3 transition-transform duration-500 hover:rotate-0 hover:scale-105">
+            
+            {/* Ticket Header Image Area */}
+            <div className="h-28 w-full bg-accent/15 relative overflow-hidden flex items-center justify-center">
+               {/* Gradient overlay */}
+               <div className="absolute inset-0 bg-gradient-to-tr from-accent/30 to-transparent"></div>
+               {/* Pattern overlay */}
+               <div className="absolute inset-0 opacity-[0.15]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)', backgroundSize: '12px 12px', color: 'var(--color-text-primary)' }}></div>
+               
+               <div className="absolute bottom-3 left-4 bg-bg/90 backdrop-blur-md px-2.5 py-1 rounded-sm text-[10px] font-bold tracking-widest text-text-primary uppercase border border-border/50 shadow-sm">
+                 VIP PASS
+               </div>
+            </div>
+
+            {/* Ticket Body */}
+            <div className="p-6 flex flex-col gap-5 relative">
+              
+              {/* Event Info */}
+              <div>
+                <h4 className="font-display font-extrabold text-[20px] text-text-primary leading-tight mb-1.5">Tech Innovators Summit '26</h4>
+                <p className="font-body text-[13px] text-text-secondary flex items-center gap-1.5 font-medium">
+                  August 15 • Moscone Center
+                </p>
+              </div>
+
+              {/* Dotted Line Divider with edge cutouts */}
+              <div className="relative flex items-center w-full my-0.5">
+                <div className="absolute -left-9 w-6 h-6 rounded-full bg-surface border-r border-border/50 z-10 shadow-inner"></div>
+                <div className="w-full border-t-2 border-dashed border-border/70"></div>
+                <div className="absolute -right-9 w-6 h-6 rounded-full bg-surface border-l border-border/50 z-10 shadow-inner"></div>
+              </div>
+
+              {/* Ticket Footer / Details */}
+              <div className="flex justify-between items-end mt-1">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Admit One</span>
+                  <div className="font-body font-extrabold text-[15px] text-text-primary">Sec 104 • Row F</div>
+                </div>
+                {/* Mock Barcode */}
+                <div className="flex gap-[3px] h-9 opacity-80">
+                  <div className="w-1 bg-text-primary rounded-sm"></div>
+                  <div className="w-0.5 bg-text-primary rounded-sm"></div>
+                  <div className="w-1.5 bg-text-primary rounded-sm"></div>
+                  <div className="w-1 bg-text-primary rounded-sm opacity-60"></div>
+                  <div className="w-0.5 bg-text-primary rounded-sm"></div>
+                  <div className="w-1.5 bg-text-primary rounded-sm"></div>
+                  <div className="w-1 bg-text-primary rounded-sm"></div>
+                  <div className="w-0.5 bg-text-primary rounded-sm opacity-50"></div>
+                  <div className="w-1 bg-text-primary rounded-sm"></div>
+                  <div className="w-1.5 bg-text-primary rounded-sm"></div>
+                  <div className="w-0.5 bg-text-primary rounded-sm opacity-70"></div>
+                  <div className="w-1 bg-text-primary rounded-sm"></div>
+                </div>
+              </div>
+
             </div>
           </div>
-          <div className="w-[300px] h-[90px] rounded-md bg-surface-elevated/60 border border-border/40 backdrop-blur-lg rotate-[3deg] translate-x-4 flex items-center px-4 gap-4 shadow-xl">
-            <div className="w-12 h-12 rounded bg-accent/20 flex-shrink-0" />
-            <div className="flex-1 flex flex-col gap-2">
-              <div className="h-3 w-2/3 rounded bg-accent/20" />
-              <div className="h-2 w-1/3 rounded bg-text-muted/20" />
-            </div>
+
+          {/* Secondary abstract card behind it for depth */}
+          <div className="absolute -z-10 top-10 w-[290px] h-[120px] rounded-xl bg-surface-elevated/40 border border-border/30 backdrop-blur-md rotate-[-5deg] -translate-x-5 opacity-60 shadow-lg">
+             <div className="h-full w-full bg-gradient-to-r from-accent/10 to-transparent rounded-xl"></div>
           </div>
-          <div className="w-[300px] h-[90px] rounded-md bg-surface-elevated/30 border border-border/20 backdrop-blur-sm rotate-[-2deg] -translate-x-2 flex items-center px-4 gap-4 opacity-50">
-            <div className="w-12 h-12 rounded bg-text-muted/10 flex-shrink-0" />
-            <div className="flex-1 flex flex-col gap-2">
-              <div className="h-3 w-1/2 rounded bg-text-muted/20" />
-              <div className="h-2 w-1/4 rounded bg-text-muted/10" />
-            </div>
-          </div>
+
         </div>
 
         <div className="mt-auto max-w-[340px]">
