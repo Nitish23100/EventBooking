@@ -17,8 +17,11 @@ export const getEvents = asyncHandler(async (req, res) => {
   }
 
   // Filter by search query (name or description matching regex)
+  // escapeRegex prevents ReDoS by treating user input as a literal string,
+  // not as regex syntax.
   if (search) {
-    const regex = new RegExp(search.trim(), 'i');
+    const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escapeRegex(search.trim()), 'i');
     query.$or = [
       { name: regex },
       { description: regex }
