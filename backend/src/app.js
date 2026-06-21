@@ -1,6 +1,7 @@
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 import { env } from './config/env.js';
 import authRoutes from './routes/auth.routes.js';
 import eventRoutes from './routes/event.routes.js';
@@ -17,8 +18,20 @@ app.use(cors({
 
 app.use(express.json());
 
-// Auth routes
-app.use('/api/auth', authRoutes);
+// Rate limiter: 20 requests per 15 minutes for auth endpoints only
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20,
+  standardHeaders: true,   // Return rate limit info in the RateLimit-* headers
+  legacyHeaders: false,     // Disable the X-RateLimit-* headers
+  message: {
+    success: false,
+    error: 'Too many requests from this IP, please try again after 15 minutes.',
+  },
+});
+
+// Auth routes (rate-limited)
+app.use('/api/auth', authLimiter, authRoutes);
 
 // Event routes
 app.use('/api/events', eventRoutes);

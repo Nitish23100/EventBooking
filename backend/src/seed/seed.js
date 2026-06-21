@@ -228,8 +228,41 @@ const seedEvents = async () => {
     await Event.deleteMany({});
     console.log("Cleared existing events.");
 
+    // Map categories to real Unsplash photo URLs
+    const categoryImages = {
+      music: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&q=80&w=1000',
+      tech: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&q=80&w=1000',
+      sports: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&q=80&w=1000',
+      comedy: 'https://images.unsplash.com/photo-1585699324551-f6c309eedeca?auto=format&fit=crop&q=80&w=1000',
+      art: 'https://images.unsplash.com/photo-1460661419208-fd20923cb222?auto=format&fit=crop&q=80&w=1000',
+      food: 'https://images.unsplash.com/photo-1504670073073-6123e39e0754?auto=format&fit=crop&q=80&w=1000',
+      theater: 'https://images.unsplash.com/photo-1514302636540-1a654924a4f8?auto=format&fit=crop&q=80&w=1000',
+      workshop: 'https://images.unsplash.com/photo-1515169061868-b39f37c77c0c?auto=format&fit=crop&q=80&w=1000',
+      conference: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=1000'
+    };
+
+    const specificImages = {
+      "Smartphone Photography Workshop": "https://plus.unsplash.com/premium_photo-1681488104322-8bd081b57509?q=80&w=1364&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "Financial Freedom Bootcamp": "https://images.unsplash.com/photo-1579621970795-87facc2f976d?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "Sculpting Clay Masterclass": "https://images.unsplash.com/photo-1499976311613-703e57dd2e53?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "Neon Canvas Exhibition": "https://images.unsplash.com/photo-1492037766660-2a56f9eb3fcb?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "Shakespeare Reimagined: Hamlet in VR": "https://plus.unsplash.com/premium_photo-1711664260571-89851270a90d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "Broadway Classics Medley": "https://images.unsplash.com/photo-1700229242705-cdd8a862f3cf?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+    };
+
+    const updatedEventsData = eventsData.map((event, index) => {
+      // Make the first two events past events for testing the disabled booking UI
+      if (index === 0 || index === 1) {
+        event.date = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000); // 5 days ago
+      }
+      return {
+        ...event,
+        imageUrl: specificImages[event.name] || categoryImages[event.category] || categoryImages.music
+      };
+    });
+
     // Insert new events
-    const createdEvents = await Event.insertMany(eventsData);
+    const createdEvents = await Event.insertMany(updatedEventsData);
     console.log(`Successfully seeded ${createdEvents.length} events!`);
 
     await mongoose.disconnect();
