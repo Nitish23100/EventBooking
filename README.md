@@ -4,6 +4,8 @@ eventflow is a full-stack event discovery and booking platform built with a Reac
 
 ---
 
+Deployed Link - https://event-booking-frontend-psi.vercel.app/
+
 ## Project Setup
 
 ### Prerequisites
