@@ -245,24 +245,7 @@ const LoginPage = () => {
             </button>
           </form>
 
-          <div className="relative my-8 flex items-center justify-center">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border" />
-            </div>
-            <span className="relative px-3 bg-bg text-[12px] font-semibold text-text-muted uppercase tracking-widest">
-              or
-            </span>
-          </div>
 
-          {/* Decorative Google Login */}
-          <button
-            type="button"
-            onClick={() => alert('Google authentication is a placeholder for styling.')}
-            className="w-full h-12 flex items-center justify-center gap-3 border border-border bg-transparent text-text-primary font-body font-semibold text-[15px] rounded-sm hover:border-accent hover:text-accent transition-all duration-200 focus:outline-none focus:ring-3 focus:ring-accent-glow"
-          >
-            <FontAwesomeIcon icon={faGoogle} className="w-4 h-4 text-text-secondary hover:text-accent" />
-            Continue with Google
-          </button>
 
           {/* Footer Navigation */}
           <p className="mt-8 text-center font-body text-[14px] text-text-secondary">
