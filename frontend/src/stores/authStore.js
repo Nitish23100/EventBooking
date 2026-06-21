@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import axios from 'axios';
+import client from '../api/client.js';
 
 export const useAuthStore = create((set) => ({
   user: (() => {
@@ -17,7 +17,7 @@ export const useAuthStore = create((set) => ({
   login: async (email, password) => {
     set({ loading: true, error: null });
     try {
-      const response = await axios.post('/api/auth/login', { email, password });
+      const response = await client.post('/auth/login', { email, password });
       const { user, token } = response.data.data;
       localStorage.setItem('eventflow-token', token);
       localStorage.setItem('eventflow-user', JSON.stringify(user));
@@ -33,7 +33,7 @@ export const useAuthStore = create((set) => ({
   register: async (name, email, password) => {
     set({ loading: true, error: null });
     try {
-      const response = await axios.post('/api/auth/register', { name, email, password });
+      const response = await client.post('/auth/register', { name, email, password });
       const { user, token } = response.data.data;
       localStorage.setItem('eventflow-token', token);
       localStorage.setItem('eventflow-user', JSON.stringify(user));
@@ -57,7 +57,7 @@ export const useAuthStore = create((set) => ({
     if (!token) return;
     set({ loading: true });
     try {
-      const response = await axios.get('/api/auth/me', {
+      const response = await client.get('/auth/me', {
         headers: { Authorization: `Bearer ${token}` },
       });
       const { user } = response.data.data;
