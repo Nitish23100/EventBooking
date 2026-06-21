@@ -1,40 +1,26 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import client from '../api/client.js';
 
 export const useEvents = (initialCategory = 'all', initialLimit = 12) => {
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
-  const [pages, setPages] = useState(1);
   const [category, setCategory] = useState(initialCategory);
   const [search, setSearch] = useState('');
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await client.get('/events', {
-          params: {
-            page,
-            limit: initialLimit,
-            category: category !== 'all' ? category : undefined,
-            search: search ? search : undefined,
-          },
-        });
-        const { events: fetchedEvents, pagination } = response.data.data;
-        setEvents(fetchedEvents);
-        setPages(pagination.pages);
-      } catch (err) {
-        setError(err.response?.data?.error || 'Failed to fetch events');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEvents();
-  }, [page, category, search, initialLimit]);
+  const eventsQuery = useQuery({
+    queryKey: ['events', { page, category, search, limit: initialLimit }],
+    queryFn: async () => {
+      const response = await client.get('/events', {
+        params: {
+          page,
+          limit: initialLimit,
+          category: category !== 'all' ? category : undefined,
+          search: search ? search : undefined,
+        },
+      });
+      return response.data.data;
+    },
+  });
 
   const changeCategory = (cat) => {
     setCategory(cat);
@@ -47,16 +33,17 @@ export const useEvents = (initialCategory = 'all', initialLimit = 12) => {
   };
 
   return {
-    events,
-    loading,
-    error,
+    events: eventsQuery.data?.events || [],
+    loading: eventsQuery.isLoading,
+    error: eventsQuery.error?.response?.data?.error || eventsQuery.error?.message || null,
     page,
     setPage,
-    pages,
+    pages: eventsQuery.data?.pagination?.pages || 1,
     category,
     setCategory: changeCategory,
     search,
     setSearch: changeSearch,
   };
 };
+
 export default useEvents;

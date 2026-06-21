@@ -1,31 +1,21 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import client from '../api/client.js';
 import useSocket from './useSocket.js';
 
 export const useEventDetails = (eventId) => {
-  const [event, setEvent] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
   const { socket, joinEvent, leaveEvent } = useSocket();
 
-  const fetchDetails = useCallback(async () => {
-    if (!eventId) return;
-    setLoading(true);
-    setError(null);
-    try {
+  const eventQuery = useQuery({
+    queryKey: ['event', eventId],
+    queryFn: async () => {
+      if (!eventId) return null;
       const response = await client.get(`/events/${eventId}`);
-      setEvent(response.data.data.event);
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to fetch event details');
-    } finally {
-      setLoading(false);
-    }
-  }, [eventId]);
-
-  // Initial HTTP Fetch
-  useEffect(() => {
-    fetchDetails();
-  }, [fetchDetails]);
+      return response.data.data.event;
+    },
+    enabled: !!eventId,
+  });
 
   // WebSocket Subscription Lifecycle
   useEffect(() => {
@@ -37,13 +27,17 @@ export const useEventDetails = (eventId) => {
     // Listen for seat updates from the server
     const handleSeatUpdate = (data) => {
       if (data.eventId === eventId) {
-        setEvent((prevEvent) => {
-          if (!prevEvent) return null;
+        // Patch the cache
+        queryClient.setQueryData(['event', eventId], (oldEvent) => {
+          if (!oldEvent) return oldEvent;
           return {
-            ...prevEvent,
+            ...oldEvent,
             availableSeats: data.availableSeats,
           };
         });
+
+        // Invalidate events cache to update lists
+        queryClient.invalidateQueries({ queryKey: ['events'] });
       }
     };
 
@@ -54,13 +48,13 @@ export const useEventDetails = (eventId) => {
       leaveEvent(eventId);
       socket.off('seatUpdate', handleSeatUpdate);
     };
-  }, [eventId, socket, joinEvent, leaveEvent]);
+  }, [eventId, socket, joinEvent, leaveEvent, queryClient]);
 
   return {
-    event,
-    loading,
-    error,
-    refetch: fetchDetails,
+    event: eventQuery.data || null,
+    loading: eventQuery.isLoading,
+    error: eventQuery.error?.response?.data?.error || eventQuery.error?.message || null,
+    refetch: eventQuery.refetch,
   };
 };
 

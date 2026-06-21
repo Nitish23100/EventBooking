@@ -1,6 +1,7 @@
 import Event from '../models/Event.js';
 import ApiError from '../utils/ApiError.js';
 import asyncHandler from '../utils/async-handler.js';
+import { semanticSearch } from '../services/ai-search.service.js';
 
 export const getEvents = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page, 10) || 1;
@@ -64,5 +65,16 @@ export const getEventById = asyncHandler(async (req, res) => {
     data: {
       event
     }
+  });
+});
+
+export const searchEvents = asyncHandler(async (req, res) => {
+  const { query } = req.body;
+  const result = await semanticSearch(query);
+
+  res.status(200).json({
+    success: true,
+    message: 'AI Search completed successfully',
+    data: result
   });
 });

@@ -104,10 +104,12 @@ const LoginPage = () => {
       <div className="flex flex-col justify-center px-6 py-12 md:py-24 sm:px-12 lg:px-20 z-10">
         <div className="mx-auto w-full max-w-[380px]">
           {/* Wordmark (mobile) */}
-          <div className="mb-8 block md:hidden">
-            <span className="font-display font-extrabold text-3xl text-text-primary">
-              <span className="text-accent">e</span>ventflow
-            </span>
+          <div className="mb-8 block md:hidden select-none">
+            <div className="flex items-center gap-2.5">
+              <span className="font-display font-extrabold text-3xl text-text-primary">
+                <span className="text-accent">e</span>ventflow
+              </span>
+            </div>
           </div>
 
           <h2 className="font-display font-bold text-[28px] text-text-primary leading-snug mb-1">

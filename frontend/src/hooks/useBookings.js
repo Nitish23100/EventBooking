@@ -1,67 +1,79 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import client from '../api/client.js';
 
 export const useBookings = () => {
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
 
-  const fetchBookings = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
+  // Fetch user bookings
+  const bookingsQuery = useQuery({
+    queryKey: ['bookings'],
+    queryFn: async () => {
       const response = await client.get('/bookings/me');
-      setBookings(response.data.data.bookings);
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to fetch bookings');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      return response.data.data.bookings;
+    },
+  });
 
-  const createBooking = useCallback(async (eventId, seats) => {
-    try {
+  // Mutation: Create Booking
+  const createBookingMutation = useMutation({
+    mutationFn: async ({ eventId, seats }) => {
       const response = await client.post('/bookings', { eventId, seats });
-      const newBooking = response.data.data.booking;
+      return response.data.data.booking;
+    },
+    onSuccess: (newBooking) => {
+      // Invalidate bookings
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      // Invalidate all events list
+      queryClient.invalidateQueries({ queryKey: ['events'] });
       
-      // Update local state by adding the new booking at the top
-      setBookings((prev) => [newBooking, ...prev]);
-      
-      return { success: true, booking: newBooking };
-    } catch (err) {
-      const errMsg = err.response?.data?.error || 'Failed to create booking';
-      return { success: false, error: errMsg };
-    }
-  }, []);
+      const eventId = newBooking.event?._id || newBooking.event;
+      if (eventId) {
+        // Invalidate details of the specific event
+        queryClient.invalidateQueries({ queryKey: ['event', eventId] });
+      }
+    },
+  });
 
-  const cancelBooking = useCallback(async (bookingId) => {
-    try {
+  // Mutation: Cancel Booking
+  const cancelBookingMutation = useMutation({
+    mutationFn: async (bookingId) => {
       const response = await client.delete(`/bookings/${bookingId}`);
-      const updatedBooking = response.data.data.booking;
+      return response.data.data.booking;
+    },
+    onSuccess: (updatedBooking) => {
+      // Invalidate bookings
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      // Invalidate all events list
+      queryClient.invalidateQueries({ queryKey: ['events'] });
       
-      // Update local state by swapping in the updated booking status
-      setBookings((prev) =>
-        prev.map((b) => (b._id === bookingId ? { ...b, status: 'cancelled' } : b))
-      );
-      
-      return { success: true, booking: updatedBooking };
-    } catch (err) {
-      const errMsg = err.response?.data?.error || 'Failed to cancel booking';
-      return { success: false, error: errMsg };
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchBookings();
-  }, [fetchBookings]);
+      const eventId = updatedBooking.event?._id || updatedBooking.event;
+      if (eventId) {
+        // Invalidate details of the specific event
+        queryClient.invalidateQueries({ queryKey: ['event', eventId] });
+      }
+    },
+  });
 
   return {
-    bookings,
-    loading,
-    error,
-    refetch: fetchBookings,
-    createBooking,
-    cancelBooking,
+    bookings: bookingsQuery.data || [],
+    loading: bookingsQuery.isLoading,
+    error: bookingsQuery.error?.response?.data?.error || bookingsQuery.error?.message || null,
+    refetch: bookingsQuery.refetch,
+    createBooking: async (eventId, seats) => {
+      try {
+        const booking = await createBookingMutation.mutateAsync({ eventId, seats });
+        return { success: true, booking };
+      } catch (err) {
+        return { success: false, error: err.response?.data?.error || err.message };
+      }
+    },
+    cancelBooking: async (bookingId) => {
+      try {
+        const booking = await cancelBookingMutation.mutateAsync(bookingId);
+        return { success: true, booking };
+      } catch (err) {
+        return { success: false, error: err.response?.data?.error || err.message };
+      }
+    },
   };
 };
 

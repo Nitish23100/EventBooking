@@ -102,6 +102,15 @@ const RegisterPage = () => {
       if (value.length < 8) {
         return "Use at least 8 characters.";
       }
+      if (!/[a-z]/.test(value)) {
+        return "Password must contain at least one lowercase letter.";
+      }
+      if (!/[A-Z]/.test(value)) {
+        return "Password must contain at least one uppercase letter.";
+      }
+      if (!/[0-9]/.test(value)) {
+        return "Password must contain at least one digit.";
+      }
     }
     if (fieldName === 'confirmPassword') {
       if (value !== password) {
@@ -229,10 +238,13 @@ const RegisterPage = () => {
       <div className="flex flex-col justify-center px-6 py-12 md:py-24 sm:px-12 lg:px-20 z-10 order-1 md:order-1">
         <div className="mx-auto w-full max-w-[380px]">
           {/* Wordmark for mobile */}
-          <div className="mb-8 block md:hidden">
-            <span className="font-display font-extrabold text-3xl text-text-primary">
-              <span className="text-accent">e</span>ventflow
-            </span>
+          <div className="mb-8 block md:hidden select-none">
+            <div className="flex items-center gap-2.5">
+              <img src="/logo.png" alt="eventflow logo" className="h-8 w-auto object-contain" />
+              <span className="font-display font-extrabold text-3xl text-text-primary">
+                <span className="text-accent">e</span>ventflow
+              </span>
+            </div>
           </div>
 
           <h2 className="font-display font-bold text-[28px] text-text-primary leading-snug mb-1">

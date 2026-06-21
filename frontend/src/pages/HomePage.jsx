@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faWandMagicSparkles, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
+import { faMagnifyingGlass, faTags, faCalendarAlt, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import useEvents from '../hooks/useEvents.js';
 import EventCard from '../components/events/EventCard.jsx';
 import SkeletonCard from '../components/events/SkeletonCard.jsx';
+import AISearchBar from '../components/events/AISearchBar.jsx';
 
 const HomePage = () => {
   const {
@@ -15,11 +16,9 @@ const HomePage = () => {
     pages,
     category,
     setCategory,
-    search,
-    setSearch,
   } = useEvents('all', 12);
 
-  const [searchInput, setSearchInput] = useState('');
+  const [aiData, setAiData] = useState(null);
   const [activeSearch, setActiveSearch] = useState('');
 
   const categories = [
@@ -32,18 +31,20 @@ const HomePage = () => {
     { id: 'workshop', label: 'Workshop' },
   ];
 
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    setSearch(searchInput);
-    setActiveSearch(searchInput);
+  const handleAISearchResults = (data, query) => {
+    setAiData(data);
+    setActiveSearch(query);
   };
 
   const handleClearFilters = () => {
-    setSearchInput('');
-    setSearch('');
+    setAiData(null);
     setActiveSearch('');
     setCategory('all');
   };
+
+  const displayEvents = aiData ? aiData.events : events;
+  const displayLoading = !aiData && loading;
+  const displayError = aiData ? null : error;
 
   return (
     <div className="bg-bg text-text-primary min-h-[calc(100vh-64px)] pb-16 transition-colors duration-200">
@@ -58,64 +59,72 @@ const HomePage = () => {
         </p>
 
         {/* AI Search Bar Spec 9.2 */}
-        <form
-          onSubmit={handleSearchSubmit}
-          className="w-full max-w-[640px] flex flex-col gap-2 group mb-4"
-        >
-          <div className="h-14 w-full flex items-center bg-surface-elevated border border-border rounded-sm focus-within:border-accent focus-within:ring-3 focus-within:ring-accent-glow transition-all duration-200 overflow-hidden">
-            <span className="pl-4 text-accent flex items-center justify-center">
-              <FontAwesomeIcon icon={faWandMagicSparkles} className="w-4 h-4" />
-            </span>
-            <input
-              type="text"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              placeholder='Try: "music concerts this weekend with 50+ seats"'
-              className="flex-grow bg-transparent border-none text-[15px] font-body text-text-primary placeholder-text-muted italic px-3 focus:outline-none"
-            />
-            <button
-              type="submit"
-              className="h-full w-20 bg-accent-fill text-white font-body font-semibold text-[14px] hover:bg-accent-fill-hover transition-colors duration-200 flex-shrink-0"
-            >
-              Search
-            </button>
+        <AISearchBar 
+          onSearchResults={handleAISearchResults} 
+          onClearSearch={handleClearFilters} 
+        />
+
+        {aiData && aiData.filters && (
+          <div className="flex flex-wrap gap-2 mt-2 items-center justify-center max-w-[640px]">
+            <span className="text-[12px] text-text-muted font-body mr-2">Filters applied:</span>
+            {aiData.filters.category && (
+              <span className="bg-accent/10 border border-accent/20 text-accent px-2 py-1 rounded-sm text-[12px] font-semibold flex items-center gap-1">
+                <FontAwesomeIcon icon={faTags} className="w-3 h-3" />
+                Category: {aiData.filters.category}
+              </span>
+            )}
+            {aiData.filters.keyword && (
+              <span className="bg-accent/10 border border-accent/20 text-accent px-2 py-1 rounded-sm text-[12px] font-semibold flex items-center gap-1">
+                <FontAwesomeIcon icon={faMagnifyingGlass} className="w-3 h-3" />
+                Keyword: {aiData.filters.keyword}
+              </span>
+            )}
+            {(aiData.filters.dateFrom || aiData.filters.dateTo) && (
+              <span className="bg-accent/10 border border-accent/20 text-accent px-2 py-1 rounded-sm text-[12px] font-semibold flex items-center gap-1">
+                <FontAwesomeIcon icon={faCalendarAlt} className="w-3 h-3" />
+                Date: {aiData.filters.dateFrom || 'Any'} to {aiData.filters.dateTo || 'Any'}
+              </span>
+            )}
+            {Object.keys(aiData.filters).length === 0 && (
+              <span className="bg-surface-elevated border border-border text-text-secondary px-2 py-1 rounded-sm text-[12px] font-semibold flex items-center gap-1">
+                <FontAwesomeIcon icon={faInfoCircle} className="w-3 h-3" />
+                No specific filters extracted
+              </span>
+            )}
           </div>
-          {activeSearch && (
-            <p className="text-left font-body text-[12px] text-text-muted px-1">
-              AI-powered search — results filtered by "{activeSearch}"
-            </p>
-          )}
-        </form>
+        )}
 
         {/* Category Filter Pills (Mobile Horizontal Scroll Spec 6.7) */}
-        <div className="relative w-full max-w-[640px] mt-4 select-none">
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-2 mask-gradient">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setCategory(cat.id)}
-                className={`h-9 px-4 rounded-pill font-body text-[13px] font-semibold flex-shrink-0 border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent-glow
-                  ${
-                    category === cat.id
-                      ? 'bg-accent-fill border-accent-fill text-white'
-                      : 'bg-transparent border-border text-text-secondary hover:border-accent/40 hover:text-accent'
-                  }
-                `}
-              >
-                {cat.label}
-              </button>
-            ))}
+        {!aiData && (
+          <div className="relative w-full max-w-[640px] mt-4 select-none">
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-2 mask-gradient">
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setCategory(cat.id)}
+                  className={`h-9 px-4 rounded-pill font-body text-[13px] font-semibold flex-shrink-0 border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent-glow
+                    ${
+                      category === cat.id
+                        ? 'bg-accent-fill border-accent-fill text-white'
+                        : 'bg-transparent border-border text-text-secondary hover:border-accent/40 hover:text-accent'
+                    }
+                  `}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+            {/* Subtle horizontal fade overlay */}
+            <div className="absolute right-0 top-0 h-9 w-12 bg-gradient-to-l from-bg to-transparent pointer-events-none hidden mobile-gradient-fade" />
           </div>
-          {/* Subtle horizontal fade overlay */}
-          <div className="absolute right-0 top-0 h-9 w-12 bg-gradient-to-l from-bg to-transparent pointer-events-none hidden mobile-gradient-fade" />
-        </div>
+        )}
       </section>
 
       {/* Events Listing */}
       <section className="px-4 sm:px-6 md:px-8 max-w-7xl mx-auto">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="font-body font-medium text-[12px] text-text-secondary uppercase tracking-[0.08em]">
-            Upcoming Events
+            {aiData ? `Search Results (${displayEvents.length})` : 'Upcoming Events'}
           </h2>
           {category !== 'all' || activeSearch ? (
             <button
@@ -128,15 +137,15 @@ const HomePage = () => {
         </div>
 
         {/* Grid View */}
-        {loading ? (
+        {displayLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
               <SkeletonCard key={i} />
             ))}
           </div>
-        ) : error ? (
+        ) : displayError ? (
           <div className="flex flex-col items-center justify-center py-16 text-center border border-border rounded-md bg-surface p-8">
-            <p className="font-body text-[15px] text-error mb-2">{error}</p>
+            <p className="font-body text-[15px] text-error mb-2">{displayError}</p>
             <button
               onClick={handleClearFilters}
               className="px-4 py-2 border border-border text-text-primary rounded-sm hover:border-accent hover:text-accent font-semibold transition-colors duration-200"
@@ -144,14 +153,14 @@ const HomePage = () => {
               Retry
             </button>
           </div>
-        ) : events.length === 0 ? (
+        ) : displayEvents.length === 0 ? (
           /* Empty State Spec 8.1 */
           <div className="flex flex-col items-center justify-center py-20 text-center border border-border rounded-md bg-surface p-8">
             <span className="w-12 h-12 text-text-muted/30 flex items-center justify-center mb-4">
               <FontAwesomeIcon icon={faMagnifyingGlass} className="w-12 h-12" />
             </span>
             <h3 className="font-display font-bold text-[18px] text-text-primary mb-1">
-              No events match your search
+              No events match your criteria
             </h3>
             <p className="font-body text-[12px] text-text-secondary max-w-sm mb-6">
               Try a different query or clear filters to browse all our upcoming event listings.
@@ -166,13 +175,13 @@ const HomePage = () => {
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {events.map((event) => (
+              {displayEvents.map((event) => (
                 <EventCard key={event._id} event={event} />
               ))}
             </div>
 
-            {/* Pagination Controls */}
-            {pages > 1 && (
+            {/* Pagination Controls - only for regular viewing, not AI search results */}
+            {!aiData && pages > 1 && (
               <div className="flex items-center justify-center gap-4 mt-12 pt-6 border-t border-border select-none">
                 <button
                   disabled={page === 1}

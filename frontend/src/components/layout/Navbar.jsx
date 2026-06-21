@@ -33,9 +33,11 @@ const Navbar = () => {
     <>
       {/* Top Navbar */}
       <nav className="sticky top-0 z-40 h-16 w-full bg-bg/80 backdrop-blur-md border-bottom border-border flex items-center justify-between px-4 sm:px-6 md:px-8 border-b">
-        {/* Left: Brand Wordmark */}
-        <Link to="/" className="font-display font-extrabold text-2xl tracking-tight text-text-primary focus:outline-none">
-          <span className="text-accent">e</span>ventflow
+        {/* Left: Brand Logo & Wordmark */}
+        <Link to="/" className="flex items-center gap-2.5 text-text-primary focus:outline-none select-none">
+          <span className="font-display font-extrabold text-2xl tracking-tight">
+            <span className="text-accent">e</span>ventflow
+          </span>
         </Link>
 
         {/* Center: Desktop Navigation Links */}
@@ -138,10 +140,12 @@ const Navbar = () => {
       >
         <div>
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <span className="font-display font-extrabold text-2xl tracking-tight text-text-primary">
-              <span className="text-accent">e</span>ventflow
-            </span>
+          <div className="flex items-center justify-between mb-8 select-none">
+            <div className="flex items-center gap-2">
+              <span className="font-display font-extrabold text-2xl tracking-tight text-text-primary">
+                <span className="text-accent">e</span>ventflow
+              </span>
+            </div>
             <button
               onClick={closeDrawer}
               className="w-9 h-9 flex items-center justify-center rounded-sm border border-border text-text-secondary hover:border-accent hover:text-accent transition-all duration-200"
