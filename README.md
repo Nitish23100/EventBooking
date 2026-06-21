@@ -169,13 +169,6 @@ GROQ_API_KEY=your_groq_api_key
 
 ---
 
-## Assumptions
-
-1. **MongoDB Access**: The application assumes a MONGODB_URI is provided. Database collections (Users, Events, Bookings) are automatically initialized and indexed on server bootstrap.
-2. **JWT Lifetime**: Tokens are set to remain valid for 7 days.
-3. **Password Security**: Passwords require a minimum of 8 characters (to match the reactive security level indicator).
-4. **Vite Proxying**: The client uses Vite's built-in dev proxying rule (defined in `vite.config.js`) to redirect `/api/*` and `/socket.io/*` requests to the Express server running on port 5000.
-
 ---
 
 ## Design Decisions
