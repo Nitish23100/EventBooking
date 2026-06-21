@@ -7,7 +7,8 @@ export const useSocket = () => {
   const socketRef = useRef(null);
 
   if (!socketInstance) {
-    socketInstance = io({
+    const socketUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : undefined;
+    socketInstance = io(socketUrl, {
       autoConnect: true,
       reconnection: true,
       reconnectionAttempts: Infinity,
