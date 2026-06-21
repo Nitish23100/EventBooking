@@ -169,6 +169,13 @@ GROQ_API_KEY=your_groq_api_key
 
 ---
 
+## Assumptions
+
+1. **Authentication**: Assumed stateless JWT authentication is sufficient and preferred over stateful session cookies for this assessment.
+2. **Search Capability**: Assumed basic text search only needs to match against the event name and description, with AI semantic search added as an enhancement.
+3. **Location Processing**: Assumed static location names are sufficient for the venue field without requiring full geocoding or interactive map integrations.
+4. **Logout Mechanism**: Assumed client-side token deletion is sufficient for logout without requiring a backend token blacklist.
+
 ---
 
 ## Design Decisions
